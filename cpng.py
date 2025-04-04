@@ -413,16 +413,16 @@ def show_about(root):
     author_label.pack(pady=2)
     
     def open_email(event):
-        webbrowser.open("mailto:robert.tulke@example.com")
+        webbrowser.open("mailto:rt@debian.sh")
     
     def open_url(event):
-        webbrowser.open("https://github.com/rtulke/colorpicker/")
+        webbrowser.open("https://github.com/rtulke/ColorPickerNG/")
     
-    email_label = tk.Label(about_win, text="robert.tulke@example.com", fg="blue", cursor="hand2")
+    email_label = tk.Label(about_win, text="rt@debian.sh", fg="blue", cursor="hand2")
     email_label.pack(pady=2)
     email_label.bind("<Button-1>", open_email)
     
-    url_label = tk.Label(about_win, text="https://github.com/rtulke/colorpicker/", fg="blue", cursor="hand2")
+    url_label = tk.Label(about_win, text="https://github.com/rtulke/ColorPickerNG/", fg="blue", cursor="hand2")
     url_label.pack(pady=2)
     url_label.bind("<Button-1>", open_url)
     
@@ -463,7 +463,7 @@ def show_tooltip(widget, text):
 def save_palette(history_entries, root):
     """Speichert die aktuelle Historie als Farbpalette."""
     if not history_entries:
-        messagebox.showinfo("Information", "Keine Farben in der Geschichte zum Speichern vorhanden.")
+        messagebox.showinfo("Information", "Keine Farben in der Historie zum Speichern vorhanden.")
         return
     
     file_path = filedialog.asksaveasfilename(
