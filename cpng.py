@@ -8,7 +8,6 @@ Description: A tool for capturing and analyzing colors on the screen
 
 Author: Robert Tulke
 E-Mail: rt@debian.sh
-Version: 2.1
 License: GPLv3
 """
 
