@@ -210,15 +210,15 @@ def get_color_linux():
         
         # Experiments with x11 screenshot
         try:
-            debug_print("Versuche alternative Linux-Methode mit x11")
-            # Verwende Python-Xlib falls verfügbar
+            debug_print("Try alternative Linux method with x11")
+            # Use Python-Xlib if available
             from Xlib import display, X
             
             d = display.Display()
             root = d.screen().root
             rgb = root.get_image(x, y, 1, 1, X.ZPixmap, 0xffffffff)
             
-            # Extrahiere RGB-Werte
+            # Extract RGB values
             data = rgb.data
             if isinstance(data, bytes) and len(data) >= 4:
                 b = data[0]
@@ -226,22 +226,22 @@ def get_color_linux():
                 r = data[2]
                 return r, g, b
         except ImportError:
-            debug_print("Python-Xlib nicht installiert")
+            debug_print("Python-Xlib not installed")
         except Exception as e:
-            debug_print(f"Fehler bei X11-Methode: {e}")
+            debug_print(f"Error in X11 method: {e}")
         
         return get_color_fallback()
     except Exception as e:
-        debug_print(f"Linux-spezifische Farberfassung fehlgeschlagen: {e}")
+        debug_print(f"Linux-specific color detection failed: {e}")
         raise
 
 def get_color_fallback():
-    """Fallback-Methode, wenn alle anderen Methoden fehlschlagen."""
-    debug_print("Verwende Fallback-Farbwert (Schwarz)")
-    # Fallback-Farbe ist Schwarz
+    """Fallback method when all other methods fail."""
+    debug_print("Use fallback color value (black)")
+    # Fallback color is black
     return 0, 0, 0
 
-# Farbkonvertierungsfunktionen
+# color conversion capabilities
 def rgb_to_hsl(r, g, b):
     r_, g_, b_ = r/255.0, g/255.0, b/255.0
     cmax = max(r_, g_, b_)
@@ -289,7 +289,7 @@ def rgb_to_hsi(r, g, b):
     if den == 0:
         h_rad = 0
     else:
-        # Vermeidung von Rundungsfehlern bei der Division
+        # Avoiding rounding errors when dividing
         div_result = max(-1, min(1, num/den))
         theta = math.acos(div_result)
         h_rad = theta if b_ <= g_ else (2 * math.pi - theta)
@@ -369,9 +369,9 @@ def rgb_to_xyz(r, g, b):
     X *= 100; Y *= 100; Z *= 100
     return f'CIE XYZ({round(X)}, {round(Y)}, {round(Z)})'
 
-# Funktion zur Berechnung aller Farbmodelle aus RGB
+# Function for calculating all color models from RGB
 def get_color_values(r, g, b):
-    """Berechnet alle Farbmodelle aus RGB-Werten."""
+    """Calculates all color models from RGB values."""
     return {
         "HEX/HTML": f'#{r:02X}{g:02X}{b:02X}',
         "RGB": f'RGB({r}, {g}, {b})',
@@ -386,19 +386,19 @@ def get_color_values(r, g, b):
     }
 
 def get_color_at_cursor():
-    """Ermittelt die Farbe am Mauszeiger und berechnet alle Farbmodelle."""
+    """Determines the color at the mouse pointer and calculates all color models."""
     r, g, b = get_platform_specific_cursor_color()
     return get_color_values(r, g, b)
 
-# Hilfsfunktionen
+# auxiliary functions
 def copy_to_clipboard(text, root):
-    """Kopiert den angegebenen Text in die Zwischenablage."""
+    """Copies the given text to the clipboard."""
     root.clipboard_clear()
     root.clipboard_append(text)
     root.update()
 
 def show_about(root):
-    """Zeigt ein 'About'-Fenster an."""
+    """Displays an 'About' window."""
     about_win = tk.Toplevel(root)
     about_win.title("About Color Picker")
     about_win.geometry("300x200")
@@ -425,15 +425,15 @@ def show_about(root):
     url_label.pack(pady=2)
     url_label.bind("<Button-1>", open_url)
     
-    features_label = tk.Label(about_win, text="Neue Features: Freeze, Paletten-Speicherung, Gruppierte Farbmodelle", 
+    features_label = tk.Label(about_win, text="New features: Freeze, palette storage, grouped color models", 
                            wraplength=280, justify=tk.LEFT)
     features_label.pack(pady=5)
     
-    close_button = tk.Button(about_win, text="Schließen", command=about_win.destroy)
+    close_button = tk.Button(about_win, text="Close", command=about_win.destroy)
     close_button.pack(pady=5)
 
 def show_tooltip(widget, text):
-    """Erstellt einen Tooltip für ein Widget."""
+    """Create a tooltip for a widget."""
     tooltip = tk.Toplevel(widget)
     tooltip.wm_overrideredirect(True)
     tooltip.wm_geometry("+0+0")
@@ -460,20 +460,20 @@ def show_tooltip(widget, text):
     return tooltip
 
 def save_palette(history_entries, root):
-    """Speichert die aktuelle Historie als Farbpalette."""
+    """Saves the current history as a color palette."""
     if not history_entries:
-        messagebox.showinfo("Information", "Keine Farben in der Historie zum Speichern vorhanden.")
+        messagebox.showinfo("Information", "No colors available in history to save.")
         return
     
     file_path = filedialog.asksaveasfilename(
         defaultextension=".json",
-        filetypes=[("JSON Farbpalette", "*.json"), ("Alle Dateien", "*.*")],
-        title="Farbpalette speichern"
+        filetypes=[("JSON color palette", "*.json"), ("All files", "*.*")],
+        title="Save color palette"
     )
     
     if file_path:
         try:
-            # Extrahiere relevante Daten aus der History
+            # Extract relevant data from the history
             palette_data = []
             for entry in history_entries:
                 color_hex = entry["hex"]
@@ -487,225 +487,225 @@ def save_palette(history_entries, root):
             with open(file_path, 'w') as f:
                 json.dump(palette_data, f, indent=2)
             
-            messagebox.showinfo("Erfolg", f"Farbpalette wurde gespeichert als: {file_path}")
+            messagebox.showinfo("success", f"Color palette was saved as: {file_path}")
         except Exception as e:
-            debug_print(f"Fehler beim Speichern der Palette: {str(e)}")
-            messagebox.showerror("Fehler", f"Fehler beim Speichern der Palette: {str(e)}")
+            debug_print(f"Error saving palette: {str(e)}")
+            messagebox.showerror("Error", f"Error saving palette: {str(e)}")
 
 def load_palette(root, add_to_history_func):
-    """Lädt eine zuvor gespeicherte Farbpalette."""
+    """Loads a previously saved color palette."""
     file_path = filedialog.askopenfilename(
         defaultextension=".json",
-        filetypes=[("JSON Farbpalette", "*.json"), ("Alle Dateien", "*.*")],
-        title="Farbpalette laden"
+        filetypes=[("JSON color palette", "*.json"), ("All files", "*.*")],
+        title="Load color palette"
     )
     
     if file_path:
         try:
-            # Lade JSON-Daten
+            # Load JSON data.
             with open(file_path, 'r') as f:
                 palette_data = json.load(f)
             
-            # Palette zur Historie hinzufügen
-            for color_entry in reversed(palette_data):  # Umkehren, damit neueste oben erscheinen
+            # Add palette to history
+            for color_entry in reversed(palette_data):  # Reverse so that the newest appear at the top
                 hex_color = color_entry["hex"]
                 values = color_entry["values"]
                 
-                # Füge jeden Eintrag zur Historie hinzu
+                # Add each entry to the history
                 add_to_history_func(values, hex_color)
             
-            messagebox.showinfo("Erfolg", f"Farbpalette wurde geladen: {file_path}")
+            messagebox.showinfo("success", f"Color palette has been loaded.: {file_path}")
             return palette_data
         except Exception as e:
-            debug_print(f"Fehler beim Laden der Palette: {str(e)}")
-            messagebox.showerror("Fehler", f"Fehler beim Laden der Palette: {str(e)}")
+            debug_print(f"Error loading the palette: {str(e)}")
+            messagebox.showerror("Error", f"Error loading the palette: {str(e)}")
             return []
 
-# Hauptklasse des Color Pickers
+# main color picker class
 class ColorPicker:
     def __init__(self, root, debug=False):
         self.debug = debug
         if self.debug:
-            debug_print("ColorPicker-Initialisierung gestartet")
+            debug_print("ColorPicker initialization started")
         
         self.root = root
         self.root.title("Advanced Color Picker")
-        self.root.geometry("500x650")  # Größeres Fenster
+        self.root.geometry("500x650")  # Larger window
         
-        # Im-Vordergrund-Option
+        # foreground option
         self.topmost_var = tk.BooleanVar(value=False)
         
         self.frozen_color = {"r": 0, "g": 0, "b": 0}
         self.freeze_var = tk.BooleanVar(value=False)
         
-        # Geschichte
-        self.history = []  # Liste von Dictionaries mit Farben und ihren Werten
+        # History
+        self.history = []  # List of dictionaries with colors and their values
         
-        # Cache für die letzte erfasste Farbe
+        # Cache for the last color captured
         self.last_color = {"r": -1, "g": -1, "b": -1}
         self.last_color_values = {}
         
-        # Zeitpunkt der letzten Aktualisierung für FPS-Begrenzung
+        # Date of last update for FPS limit
         self.last_update_time = 0
         
-        # Beenden-Handler
+        # termination handler
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         
-        # Lade gespeicherte Einstellungen
+        # Load saved settings.
         self.load_settings()
         
         self.create_ui()
         self.setup_keyboard_shortcuts()
         
         if self.debug:
-            debug_print("ColorPicker initialisiert, starte Update-Schleife")
+            debug_print("ColorPicker initialized, starting update loop")
         
-        # Starte Update-Schleife
+        # Starting update loop
         self.update_color()
     
     def save_settings(self):
-        """Speichert die aktuellen Einstellungen."""
+        """Saves the current settings."""
         settings = {
             "topmost": self.topmost_var.get()
-            # Hier können später weitere Einstellungen hinzugefügt werden
+            # Further settings can be added here later.
         }
         
         try:
-            # Speichern in der gleichen Verzeichnis wie das Programm
+            # Save in the same directory as the program
             settings_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                         "colorpicker_settings.json")
             with open(settings_file, 'w') as f:
                 json.dump(settings, f)
             
             if self.debug:
-                debug_print(f"Einstellungen gespeichert in {settings_file}")
+                debug_print(f"Settings saved in {settings_file}")
         except Exception as e:
             if self.debug:
-                debug_print(f"Fehler beim Speichern der Einstellungen: {str(e)}")
+                debug_print(f"Error saving settings: {str(e)}")
 
     def load_settings(self):
-        """Lädt die gespeicherten Einstellungen."""
+        """Loads the saved settings."""
         try:
-            # Laden aus dem gleichen Verzeichnis wie das Programm
+            # Loading from the same directory as the program
             settings_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                         "colorpicker_settings.json")
             if os.path.exists(settings_file):
                 with open(settings_file, 'r') as f:
                     settings = json.load(f)
                 
-                # Topmost-Einstellung anwenden
+                # Apply topmost setting
                 if "topmost" in settings:
                     self.topmost_var.set(settings["topmost"])
                     self.root.wm_attributes("-topmost", settings["topmost"])
                 
                 if self.debug:
-                    debug_print(f"Einstellungen geladen aus {settings_file}")
+                    debug_print(f"Settings loaded from {settings_file}")
         except Exception as e:
             if self.debug:
-                debug_print(f"Fehler beim Laden der Einstellungen: {str(e)}")
+                debug_print(f"Error loading settings: {str(e)}")
     
     def on_closing(self):
-        """Wird aufgerufen, wenn das Programm beendet wird."""
+        """This is called when the program is closed."""
         self.save_settings()
         self.root.destroy()
         
     def create_ui(self):
-        """Erstellt die Benutzeroberfläche."""
+        """Creates the user interface."""
         if self.debug:
-            debug_print("Erstelle Benutzeroberfläche")
+            debug_print("Create user interface")
         
-        # Hauptframe
+        # main frame
         main_frame = ttk.Frame(self.root, padding=10)
         main_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Menüleiste
+        # menu bar
         self.create_menu()
         
-        # Info-Label (linksbündig)
-        info_label = ttk.Label(main_frame, text="Farbe unter dem Cursor wird live erfasst", anchor="w")
+        # info label (left-aligned)
+        info_label = ttk.Label(main_frame, text="The color under the cursor is captured live.", anchor="w")
         info_label.pack(pady=5, fill=tk.X)
         
-        # Frame für Farbanzeige und Freeze-Button
+        # frame for color display and freeze button
         color_control_frame = ttk.Frame(main_frame)
         color_control_frame.pack(fill=tk.X, pady=5)
         
-        # Farbvorschau (größer)
+        # color preview (larger)
         self.color_display = ttk.Label(color_control_frame, text="", width=15, relief="solid")
         self.color_display.pack(side=tk.LEFT, padx=5, fill=tk.BOTH)
         
-        # Freeze-Button
-        freeze_button = ttk.Button(color_control_frame, text="Freeze (Space)", 
+        # freeze button
+        freeze_button = ttk.Button(color_control_frame, text="freeze (space)", 
                                  command=self.toggle_freeze)
         freeze_button.pack(side=tk.LEFT, padx=5)
         
-        # Vordergrund-Kontrollkästchen
+        # foreground checkbox
         topmost_cb = ttk.Checkbutton(color_control_frame, 
-                                   text="Im Vordergrund",
+                                   text="Stop in the foreground",
                                    variable=self.topmost_var,
                                    command=self.toggle_topmost)
         topmost_cb.pack(side=tk.LEFT, padx=5)
         
-        # Alle Farbwerte anzeigen
+        # Show all color values
         self.create_color_values_display(main_frame)
         
-        # Frame für Paletten-Bereich und Historie
+        # Frame for pallet area and history
         bottom_frame = ttk.Frame(main_frame)
         bottom_frame.pack(fill=tk.BOTH, expand=True, pady=5)
         
-        # Scrollbarer History-Bereich
+        # Scrollable history section
         self.create_history_area(bottom_frame)
         
         if self.debug:
-            debug_print("Benutzeroberfläche erstellt")
+            debug_print("user interface created")
     
     def create_menu(self):
-        """Erstellt die Menüleiste."""
+        """Creates the menu bar."""
         menubar = tk.Menu(self.root)
         
-        # Datei-Menü
+        # file menu
         filemenu = tk.Menu(menubar, tearoff=0)
-        filemenu.add_command(label="Palette speichern", command=self.save_current_palette)
-        filemenu.add_command(label="Palette laden", command=self.load_palette)
+        filemenu.add_command(label="Save pallet", command=self.save_current_palette)
+        filemenu.add_command(label="Load pallet", command=self.load_palette)
         filemenu.add_separator()
-        filemenu.add_command(label="Beenden (Esc)", command=self.root.quit, accelerator="Esc")
-        menubar.add_cascade(label="Datei", menu=filemenu)
+        filemenu.add_command(label="Cancel (Esc)", command=self.root.quit, accelerator="Esc")
+        menubar.add_cascade(label="File", menu=filemenu)
         
-        # Bearbeiten-Menü
+        # Edit menu
         editmenu = tk.Menu(menubar, tearoff=0)
         editmenu.add_command(label="Freeze/Unfreeze", command=self.toggle_freeze, accelerator="Space")
-        editmenu.add_command(label="Aktuelle Farbe kopieren", command=self.copy_current_color, accelerator="Strg+C")
+        editmenu.add_command(label="Copy current color mode", command=self.copy_current_color, accelerator="Strg+C")
         editmenu.add_separator()
-        editmenu.add_checkbutton(label="Im Vordergrund halten", 
+        editmenu.add_checkbutton(label="Stop in the foreground", 
                                variable=self.topmost_var, 
                                command=self.toggle_topmost)
         editmenu.add_separator()                       
-        editmenu.add_command(label="Historie leeren", command=self.clear_history)
-        menubar.add_cascade(label="Bearbeiten", menu=editmenu)
+        editmenu.add_command(label="Clear history", command=self.clear_history)
+        menubar.add_cascade(label="Edit", menu=editmenu)
         
-        # Hilfe-Menü
+        # Help menu
         helpmenu = tk.Menu(menubar, tearoff=0)
-        helpmenu.add_command(label="Über Color Picker", command=lambda: show_about(self.root), accelerator="F1")
+        helpmenu.add_command(label="About Color Picker", command=lambda: show_about(self.root), accelerator="F1")
         
-        # Debug-Option, falls Debug-Modus aktiv
+        # Debug option if debug mode is active
         if self.debug:
             helpmenu.add_separator()
-            helpmenu.add_command(label="Test Farberfassung", command=self.test_color_detection)
+            helpmenu.add_command(label="Test color capture", command=self.test_color_detection)
         
-        menubar.add_cascade(label="Hilfe", menu=helpmenu)
+        menubar.add_cascade(label="Help.", menu=helpmenu)
         
         self.root.config(menu=menubar)
     
     def create_color_values_display(self, parent):
-        """Erstellt den Bereich für die Anzeige aller Farbwerte."""
-        # Verwendung eines LabelFrame mit Rahmen
-        values_frame = ttk.LabelFrame(parent, text="Farbwerte")
+        """Creates the area for displaying all color values."""
+        # Use of a LabelFrame with a frame
+        values_frame = ttk.LabelFrame(parent, text="color values")
         values_frame.pack(fill=tk.BOTH, padx=5, pady=5)
         
-        # Spaltenweise Anordnung der Farbmodelle
+        # Column-wise arrangement of the color models
         color_models_frame = ttk.Frame(values_frame)
         color_models_frame.pack(fill=tk.BOTH, padx=5, pady=5)
         
-        # Gruppieren von Farbmodellen
+        # Grouping of color models
         color_groups = {
             "Web": ["HEX/HTML", "RGB"],
             "HSx-Modelle": ["HSL", "HSV", "HSI"],
@@ -713,180 +713,180 @@ class ColorPicker:
             "Erweitert": ["CIE LAB", "CIELCh", "CIE XYZ", "YCbCr"]
         }
         
-        # Tooltips für komplexere Farbmodelle
+        # Tooltips for more complex color models
         tooltips = {
-            "HSL": "Hue, Saturation, Lightness - Gut für intuitive Farbauswahl",
-            "HSV": "Hue, Saturation, Value - Optimal für Farbwahldialoge",
-            "HSI": "Hue, Saturation, Intensity - Alternative zu HSL",
-            "CMYK": "Cyan, Magenta, Yellow, Key (Black) - Für Druckanwendungen",
-            "CIE LAB": "L* (Helligkeit), a* (Grün-Rot-Achse), b* (Blau-Gelb-Achse) - Geräteunabhängiges Farbmodell",
-            "CIELCh": "Lightness, Chroma, Hue - Intuitivere Version des LAB-Modells",
-            "YCbCr": "Y (Luminanz), Cb (Blau-Differenz), Cr (Rot-Differenz) - Für Videoanwendungen",
-            "CIE XYZ": "Standardisiertes Farbmodell, Basis vieler anderer Modelle"
+            "HSL": "Hue, Saturation, Lightness - Good for intuitive color selection",
+            "HSV": "Hue, Saturation, Value - Optimal for color selection dialogs",
+            "HSI": "Hue, Saturation, Intensity - Alternative to HSL",
+            "CMYK": "Cyan, Magenta, Yellow, Key (Black) - For printing applications",
+            "CIE LAB": "L* (brightness), a* (green-red axis), b* (blue-yellow axis) - device-independent color model",
+            "CIELCh": "Lightness, Chroma, Hue - A more intuitive version of the LAB model",
+            "YCbCr": "Y (luminance), Cb (blue difference), Cr (red difference) - For video applications",
+            "CIE XYZ": "Standardized color model, basis for many other models"
         }
         
-        # Erstelle die UI-Elemente für jede Gruppe
+        # Create UI elements for each group
         group_row = 0
         group_col = 0
         
         for group_name, models in color_groups.items():
-            # Gruppe als Label
+            # Group as label
             group_label = ttk.Label(color_models_frame, text=group_name + ":", font=("Helvetica", 10, "bold"))
             group_label.grid(row=group_row, column=group_col, sticky=tk.W, padx=5, pady=(5, 2))
             
-            # Farbmodelle dieser Gruppe
+            # Color models of this group
             model_row = group_row + 1
             for model in models:
-                # Label für den Modellnamen
+                # Label for the model name
                 model_label = ttk.Label(color_models_frame, text=model + ":")
                 model_label.grid(row=model_row, column=group_col, sticky=tk.W, padx=5)
                 
-                # Wert-Label für dieses Modell
+                # Value label for this model
                 value_label = ttk.Label(color_models_frame, text="")
                 value_label.grid(row=model_row, column=group_col+1, sticky=tk.W, padx=5)
                 
-                # Tooltip hinzufügen, wenn vorhanden
+                # Add tooltip if available
                 if model in tooltips:
                     show_tooltip(model_label, tooltips[model])
                 
-                # Referenz auf das Label speichern
+                # Save reference to label
                 setattr(self, f"{model.lower().replace('/', '_')}_label", value_label)
                 
                 model_row += 1
             
-            # Nächste Gruppe rechts oder in neuer Zeile
-            if group_col < 1:  # Maximal 2 Spalten
+            # Next group on the right or in a new line
+            if group_col < 1:  # Maximum 2 columns
                 group_col += 2
             else:
                 group_col = 0
                 group_row = model_row + 1
         
-        # Kopier-Info
-        #copy_info = ttk.Label(values_frame, text="(Strg+C zum Kopieren des aktuell ausgewählten Farbe)")
+        # copy info
+        #copy_info = ttk.Label(values_frame, text="(Ctrl+C to copy the currently selected color)")
         #copy_info.pack(pady=5)
 
     def create_history_area(self, parent):
-        """Erstellt den scrollbaren Historienbereich mit verbessertem Scrolling."""
+        """Creates the scrollable history area with improved scrolling."""
         history_frame = ttk.LabelFrame(parent, text="History")
         history_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
-        # Rahmen für Canvas und Scrollbalken
+        # frame for canvas and scrollbars
         scroll_frame = ttk.Frame(history_frame)
         scroll_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Canvas für das Scrollen (ohne sichtbaren Rahmen)
+        # Canvas for scrolling (without visible frame)
         self.history_canvas = tk.Canvas(scroll_frame, highlightthickness=0, bd=0)
         
-        # Scrollbar mit sichtbarer Konfiguration
+        # Scrollbar with visible configuration
         history_scrollbar = ttk.Scrollbar(scroll_frame, orient="vertical", 
                                      command=self.history_canvas.yview)
         
-        # Wichtig: Pack scrollbar ZUERST, damit es immer sichtbar ist
+        # Important: Pack scrollbar FIRST so that it is always visible
         history_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.history_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
-        # Canvas mit Scrollbar verbinden
+        # Connect canvas with scrollbar
         self.history_canvas.configure(yscrollcommand=history_scrollbar.set)
         
-        # Frame innerhalb des Canvas für die History-Einträge (ohne sichtbaren Rahmen)
+        # Frame within the canvas for the history entries (without visible frame)
         self.history_frame = ttk.Frame(self.history_canvas, padding=0)
         self.history_canvas_window = self.history_canvas.create_window(
             (0, 0), window=self.history_frame, anchor="nw", 
-            width=self.history_canvas.winfo_width()  # Wichtig: Breite festlegen
+            width=self.history_canvas.winfo_width()  # Important: set width
         )
         
-        # Mausrad-Scrolling für ALLE relevanten Widgets
-        # Funktionen für Scrolling
+        # Mouse wheel scrolling for ALL relevant widgets
+        # Scrolling functions
         def _bind_mousewheel(widget):
             widget.bind("<MouseWheel>", self.on_mousewheel)  # Windows
             widget.bind("<Button-4>", self.on_mousewheel)    # Linux Scroll-up
             widget.bind("<Button-5>", self.on_mousewheel)    # Linux Scroll-down
             
-            # Für macOS
+            # For macOS
             if platform.system() == 'Darwin':
                 widget.bind("<MouseWheel>", self.on_mousewheel_macos)
             
-            # Rekursiv für alle untergeordneten Widgets
+            # Recursive for all child widgets
             for child in widget.winfo_children():
                 _bind_mousewheel(child)
         
-        # Scrolling für Canvas und Inhalt aktivieren
+        # Enable scrolling for canvas and content
         _bind_mousewheel(self.history_canvas)
         _bind_mousewheel(self.history_frame)
         
-        # Diese Methode erneut aufrufen, wenn neue Einträge hinzugefügt werden
+        # Recall this method when new entries are added
         self.bind_history_scroll = _bind_mousewheel
         
-        # Konfiguriere Canvas-Scroll-Region
+        # Configure canvas scroll region
         self.history_frame.bind("<Configure>", self.on_history_frame_configure)
         self.history_canvas.bind("<Configure>", self.on_history_canvas_configure)
 
     def on_history_frame_configure(self, event):
-        """Aktualisiert die Scroll-Region des Canvas auf die tatsächliche Größe des Frames."""
-        # Die Scroll-Region auf die tatsächliche Größe des inneren Frames setzen
+        """Updates the scroll region of the canvas to the actual size of the frame."""
+        # Set the scroll region to the actual size of the inner frame
         self.history_canvas.configure(scrollregion=self.history_canvas.bbox("all"))
         
-        # Debugging für Scrollregion
+        # Debugging for scroll region
         if self.debug:
             region = self.history_canvas.bbox("all")
-            debug_print(f"Scroll-Region aktualisiert: {region}")
+            debug_print(f"Scroll region updated: {region}")
     
     def on_history_canvas_configure(self, event):
-        """Passt die Breite des inneren Frames an den Canvas an."""
-        # Sicherstellen, dass der innere Frame die volle Breite des Canvas hat
+        """Adjusts the width of the inner frame to fit the canvas."""
+        # Make sure that the inner frame is the full width of the canvas.
         canvas_width = event.width
         self.history_canvas.itemconfig(self.history_canvas_window, width=canvas_width)
         
-        # Auch die Scroll-Region aktualisieren
+        # Update the scroll region, too
         self.history_canvas.configure(scrollregion=self.history_canvas.bbox("all"))
     
     def on_mousewheel(self, event):
-        """Handhabt das Scrollen mit dem Mausrad (für Windows und Linux)."""
-        # Plattformspezifische Verarbeitung des Mausrad-Events
+        """Enables scrolling with the mouse wheel (for Windows and Linux)."""
+        # Platform-specific processing of the mouse wheel event
         if hasattr(event, 'num') and event.num in (4, 5):  # Linux
             delta = -1 if event.num == 5 else 1
         elif hasattr(event, 'delta'):  # Windows
-            delta = event.delta // 120  # Normalisierung für Windows
+            delta = event.delta // 120  # Normalization for Windows
         else:
             delta = 0
             
-        # Scroll-Richtung und -Stärke anpassen
+        # Customize scroll direction and strength
         if delta != 0:
-            # Den gleichen Scrollbefehl wie ein Klick auf die Scrollbar
+            # The same scrolling command as clicking the scrollbar
             self.history_canvas.yview_scroll(-delta, "units")
-            # Event als "behandelt" markieren, damit andere Widgets es nicht bekommen
+            # Mark event as “handled” so that other widgets don't get it
             return "break"
     
     def on_mousewheel_macos(self, event):
-        """Handhabt das Scrollen mit dem Mausrad (für macOS)."""
-        # macOS hat ein anderes Vorzeichen für das Scrolling
+        """Use the mouse wheel to scroll (for macOS)."""
+        # macOS has a different sign for scrolling
         delta = -1 if event.delta > 0 else 1
                 
-        # Den gleichen Scrollbefehl wie ein Klick auf die Scrollbar
+        # The same scrolling command as clicking the scrollbar
         self.history_canvas.yview_scroll(delta, "units")
-        # Event als "behandelt" markieren, damit andere Widgets es nicht bekommen
+        # Mark event as “handled” so that other widgets don't get it
         return "break"
     
     def setup_keyboard_shortcuts(self):
-        """Richtet Tastaturkürzel ein."""
-        # ESC zum Beenden
+        """Sets up keyboard shortcuts."""
+        # Press ESC to end
         self.root.bind("<Escape>", lambda e: self.root.quit())
         
-        # F1 für About-Dialog
+        # F1 for about dialog
         self.root.bind("<F1>", lambda e: show_about(self.root))
         
-        # Leertaste für Freeze
+        # Space bar for freeze
         self.root.bind("<space>", lambda e: self.toggle_freeze())
         
-        # Strg+C zum Kopieren
+        # Ctrl+C to copy
         self.root.bind("<Control-c>", lambda e: self.copy_current_color())
     
     def toggle_freeze(self):
-        """Wechselt zwischen Freeze/Unfreeze der Farberfassung."""
+        """Toggles between freezing and unfreezing the color detection."""
         new_value = not self.freeze_var.get()
         self.freeze_var.set(new_value)
         
-        # Wenn eingefroreren, speichere die aktuelle Farbe
+        # When freezing, save the current color
         if new_value:
             colors = get_color_at_cursor()
             rgb = colors["RGB"]
@@ -896,25 +896,25 @@ class ColorPicker:
                 r, g, b = map(int, match.groups())
                 self.frozen_color["r"], self.frozen_color["g"], self.frozen_color["b"] = r, g, b
                 if self.debug:
-                    debug_print(f"Farbe eingefroren: RGB({r}, {g}, {b})")
+                    debug_print(f"color frozen: RGB({r}, {g}, {b})")
     
     def toggle_topmost(self):
-        """Aktiviert oder deaktiviert das Im-Vordergrund-Halten."""
+        """Enables or disables keeping the foreground."""
         is_topmost = self.topmost_var.get()
         self.root.wm_attributes("-topmost", is_topmost)
         if self.debug:
-            debug_print(f"Im-Vordergrund-Modus: {'aktiv' if is_topmost else 'inaktiv'}")
+            debug_print(f"foreground mode: {'active' if is_topmost else 'inactive'}")
         self.save_settings()
     
     def copy_current_color(self):
-        """Kopiert den aktuellen Farbwert in die Zwischenablage."""
+        """Copy the current color value to the clipboard."""
         if self.freeze_var.get():
             r, g, b = self.frozen_color["r"], self.frozen_color["g"], self.frozen_color["b"]
             colors = get_color_values(r, g, b)
         else:
             colors = get_color_at_cursor()
         
-        # Verwende das erste Farbmodell als Standard
+        # Use the first color model as default
         model = list(colors.keys())[0]
         value = colors[model]
         
@@ -922,172 +922,172 @@ class ColorPicker:
         self.add_to_history(value, colors["HEX/HTML"])
         
         if self.debug:
-            debug_print(f"Kopiert in Zwischenablage: {value}")
+            debug_print(f"Copied to clipboard: {value}")
     
     def add_to_history(self, value, hex_color):
-        """Fügt einen neuen Eintrag zur Historie hinzu."""
-        # Speichere alle Werte dieses Farbwertes
+        """Add a new entry to the history."""
+        # Save all values of this color value
         if self.freeze_var.get():
             r, g, b = self.frozen_color["r"], self.frozen_color["g"], self.frozen_color["b"]
             all_values = get_color_values(r, g, b)
         else:
             all_values = self.last_color_values.copy() if self.last_color_values else get_color_at_cursor()
         
-        # Füge zur History-Liste hinzu
+        # Add to history list
         self.history.insert(0, {"hex": hex_color, "values": all_values, "selected": value})
         
-        # Begrenze die Größe der Historie
+        # Limit the size of the history
         if len(self.history) > 50:
             self.history.pop()
         
-        # UI-Aktualisierung
+        # UI update
         self.update_history_display()
         
         if self.debug:
-            debug_print(f"Farbe zur Historie hinzugefügt: {hex_color}")
+            debug_print(f"color added to history: {hex_color}")
     
     def update_history_display(self):
-        """Aktualisiert die History-Anzeige mit Scrollfunktion für alle Elemente."""
-        # Lösche bisherige Einträge
+        """Update the history display with a scroll function for all elements."""
+        # Delete previous entries
         for widget in self.history_frame.winfo_children():
             widget.destroy()
         
-        # Zeige neue Einträge
+        # Show new entries
         for idx, entry in enumerate(self.history):
             hex_color = entry["hex"]
             selected_value = entry["selected"]
             
-            # Frame ohne sichtbaren Rahmen
+            # frameless frame
             row = ttk.Frame(self.history_frame, padding=0)
             row.pack(fill=tk.X, pady=2, padx=2)
             
-            # Farbvorschau
+            # color preview
             color_preview = ttk.Label(row, text="", background=hex_color, width=3)
             color_preview.pack(side=tk.LEFT, padx=2)
             
-            # Wert-Text
+            # value text
             text_label = ttk.Label(row, text=selected_value)
             text_label.pack(side=tk.LEFT, padx=2, fill=tk.X, expand=True)
             
-            # Kopiertaste
-            copy_btn = ttk.Button(row, text="Copy", 
+            # copy button
+            copy_btn = ttk.Button(row, text="copy", 
                                command=lambda val=selected_value: copy_to_clipboard(val, self.root))
             copy_btn.pack(side=tk.LEFT, padx=2)
             
-            # Löschtaste
-            delete_btn = ttk.Button(row, text="Löschen", 
+            # delete button
+            delete_btn = ttk.Button(row, text="delete", 
                                  command=lambda idx=idx: self.delete_history_entry(idx))
             delete_btn.pack(side=tk.LEFT, padx=2)
         
-        # Nach dem Hinzufügen aller Einträge die Scroll-Region aktualisieren
+        # Update the scroll region after adding all entries
         self.history_canvas.configure(scrollregion=self.history_canvas.bbox("all"))
         
-        # Wichtig: Binde Mausrad-Scrolling für ALLE neuen Elemente
+        # Important: Bind mouse wheel scrolling for ALL new elements
         if hasattr(self, 'bind_history_scroll'):
             self.bind_history_scroll(self.history_frame)
         
-        # Wenn es Einträge gibt, nach oben scrollen
+        # If there are entries, scroll up.
         if self.history:
             self.history_canvas.yview_moveto(0.0)
     
     def delete_history_entry(self, index):
-        """Löscht einen Eintrag aus der Farbhistorie."""
+        """Deletes an entry from the color history."""
         if 0 <= index < len(self.history):
             del self.history[index]
             self.update_history_display()
             if self.debug:
-                debug_print(f"Historieneintrag {index} gelöscht")
+                debug_print(f"history entry {index} deleted")
     
     def clear_history(self):
-        """Löscht die gesamte Farbhistorie."""
-        result = messagebox.askyesno("Historie löschen", 
-                                   "Möchten Sie wirklich die gesamte Farbhistorie löschen?")
+        """Deletes the entire color history."""
+        result = messagebox.askyesno("Delete history", 
+                                   "Are you sure you want to delete all color history?")
         if result:
             self.history = []
             self.update_history_display()
             if self.debug:
-                debug_print("Gesamte Historie gelöscht")
+                debug_print("Entire history deleted")
     
     def save_current_palette(self):
-        """Speichert die aktuelle Palette."""
+        """Saves the current palette."""
         save_palette(self.history, self.root)
     
     def load_palette(self):
-        """Lädt eine Palette und fügt sie zur Historie hinzu."""
+        """Loads a palette and adds it to the history."""
         load_palette(self.root, self.add_to_history)
     
     def update_color_displays(self, colors):
-        """Aktualisiert alle Farbwert-Anzeigen."""
-        # Farbvorschau
+        """Updates all color value displays."""
+        # color preview
         self.color_display.configure(background=colors["HEX/HTML"])
         
-        # Alle Wert-Labels aktualisieren
+        # Update all value labels
         for model, value in colors.items():
             label_name = f"{model.lower().replace('/', '_')}_label"
             if hasattr(self, label_name):
                 label = getattr(self, label_name)
                 label.configure(text=value)
         
-        # Setze Fenstertitel mit Freeze-Info
+        # Set window title with freeze info
         if self.freeze_var.get():
-            self.root.title("Advanced Color Picker - Eingefroren")
+            self.root.title("Advanced Color Picker - Frozen")
         else:
             self.root.title("Advanced Color Picker")
     
     def test_color_detection(self):
-        """Testet die Farberfassungsfunktionen."""
+        """Tests the color detection functions."""
         if not self.debug:
             return
             
         test_win = tk.Toplevel(self.root)
-        test_win.title("Farberfassungstest")
+        test_win.title("color perception test")
         test_win.geometry("400x300")
         
-        # Test direkter Farberfassung
-        ttk.Label(test_win, text="Farberfassungstest:", font=("Arial", 12, "bold")).pack(pady=5)
+        # Test of direct color capture
+        ttk.Label(test_win, text="color perception test:", font=("Arial", 12, "bold")).pack(pady=5)
         
-        # Teste Windows-Methode
-        win_frame = ttk.LabelFrame(test_win, text="Windows-Methode")
+        # Test Windows method
+        win_frame = ttk.LabelFrame(test_win, text="Windows method")
         win_frame.pack(fill=tk.X, padx=10, pady=5)
         
-        win_result = ttk.Label(win_frame, text="Nicht getestet")
+        win_result = ttk.Label(win_frame, text="Not tested.")
         win_result.pack(pady=5)
         
-        ttk.Button(win_frame, text="Testen", 
+        ttk.Button(win_frame, text="test", 
                 command=lambda: self.test_method(win_result, "windows")).pack(pady=5)
         
-        # Teste macOS-Methode
-        mac_frame = ttk.LabelFrame(test_win, text="macOS-Methode")
+        # test macOS method
+        mac_frame = ttk.LabelFrame(test_win, text="macOS method")
         mac_frame.pack(fill=tk.X, padx=10, pady=5)
         
-        mac_result = ttk.Label(mac_frame, text="Nicht getestet")
+        mac_result = ttk.Label(mac_frame, text="Not tested.")
         mac_result.pack(pady=5)
         
-        ttk.Button(mac_frame, text="Testen", 
+        ttk.Button(mac_frame, text="test", 
                 command=lambda: self.test_method(mac_result, "macos")).pack(pady=5)
         
-        # Teste Linux-Methode
-        linux_frame = ttk.LabelFrame(test_win, text="Linux-Methode")
+        # Test the Linux method
+        linux_frame = ttk.LabelFrame(test_win, text="Linux method")
         linux_frame.pack(fill=tk.X, padx=10, pady=5)
         
-        linux_result = ttk.Label(linux_frame, text="Nicht getestet")
+        linux_result = ttk.Label(linux_frame, text="Not tested.")
         linux_result.pack(pady=5)
         
-        ttk.Button(linux_frame, text="Testen", 
+        ttk.Button(linux_frame, text="test", 
                  command=lambda: self.test_method(linux_result, "linux")).pack(pady=5)
         
-        # Teste Fallback-Methode
-        fallback_frame = ttk.LabelFrame(test_win, text="Fallback-Methode")
+        # Test fallback method
+        fallback_frame = ttk.LabelFrame(test_win, text="fallback method")
         fallback_frame.pack(fill=tk.X, padx=10, pady=5)
         
-        fallback_result = ttk.Label(fallback_frame, text="Nicht getestet")
+        fallback_result = ttk.Label(fallback_frame, text="Not tested.")
         fallback_result.pack(pady=5)
         
-        ttk.Button(fallback_frame, text="Testen", 
+        ttk.Button(fallback_frame, text="test", 
                  command=lambda: self.test_method(fallback_result, "fallback")).pack(pady=5)
     
     def test_method(self, result_label, method):
-        """Testet eine bestimmte Farberfassungsmethode."""
+        """Tests a particular color capture method."""
         try:
             if method == "windows":
                 r, g, b = get_color_windows()
@@ -1101,31 +1101,31 @@ class ColorPicker:
             color_hex = f"#{r:02X}{g:02X}{b:02X}"
             result_label.configure(text=f"RGB({r}, {g}, {b}) - {color_hex}", background=color_hex)
             if method != "fallback":
-                debug_print(f"{method.capitalize()}-Methode erfolgreich: RGB({r}, {g}, {b})")
+                debug_print(f"{method.capitalize()}-method successful: RGB({r}, {g}, {b})")
             return True
         except Exception as e:
-            result_label.configure(text=f"Fehler: {str(e)}")
-            debug_print(f"{method.capitalize()}-Methode fehlgeschlagen: {e}")
+            result_label.configure(text=f"error: {str(e)}")
+            debug_print(f"{method.capitalize()}-Method failed: {e}")
             return False
     
     def update_color(self):
-        """Aktualisiert die Farbanzeige (mit Aktualisierungsrate-Begrenzung)."""
+        """Updates the color display (with refresh rate limit)."""
         current_time = time.time()
         
         try:
-            # Begrenze die Update-Rate auf 20 FPS (50ms)
+            # Limit the update rate to 20 FPS (50ms)
             if current_time - self.last_update_time >= 0.05:
                 self.last_update_time = current_time
                 
                 if self.freeze_var.get():
-                    # Verwende eingefrorene Farbe
+                    # Use frozen color
                     r, g, b = self.frozen_color["r"], self.frozen_color["g"], self.frozen_color["b"]
                     colors = get_color_values(r, g, b)
                 else:
-                    # Hole aktuelle Farbe unter dem Cursor
+                    # Get the current color under the cursor
                     r, g, b = get_platform_specific_cursor_color()
                     
-                    # Cache: Nur wenn sich die Farbe geändert hat
+                    # Cache: Only if the color has changed
                     if (r != self.last_color["r"] or 
                         g != self.last_color["g"] or 
                         b != self.last_color["b"]):
@@ -1134,39 +1134,39 @@ class ColorPicker:
                     
                     colors = self.last_color_values
                 
-                # Aktualisiere die Anzeige
+                # Refresh the display
                 self.update_color_displays(colors)
         except Exception as e:
             if self.debug:
-                debug_print(f"Fehler bei Farb-Update: {str(e)}")
+                debug_print(f"Error during color update: {str(e)}")
         
-        # Nächstes Update planen
+        # Schedule next update.
         self.root.after(20, self.update_color)
 
 def check_platform_requirements():
-    """Überprüft plattformspezifische Anforderungen und gibt Warnungen aus."""
+    """Checks for platform-specific requirements and issues warnings."""
     system = platform.system()
     
     if system == 'Darwin':  # macOS
-        # Prüfen der Bildschirmzugriffsrechte
+        # Checking screen access rights
         try:
             test_result = subprocess.run(
                 ['osascript', '-e', 'tell application "System Events" to get the name of every process'],
                 capture_output=True
             )
             if test_result.returncode != 0:
-                print("\nWARNUNG: Der Color Picker benötigt Zugriff auf Bedienungshilfen unter macOS.")
-                print("Bitte gehen Sie zu Systemeinstellungen → Sicherheit → Datenschutz → Bedienungshilfen")
-                print("und fügen Sie Ihre Terminal-App oder Python-Interpreter hinzu.")
+                print("\nWARNING: The Color Picker requires access to operating aids under macOS.")
+                print("Please go to System Preferences → Security → Privacy → Accessibility.")
+                print("and add your terminal app or Python interpreter.")
         except Exception:
-            print("\nWARNUNG: Konnte macOS-Berechtigungen nicht überprüfen.")
+            print("\nWARNING: Could not verify macOS authorizations.")
     
     elif system == 'Linux':
-        # Überprüfen von notwendigen Linux-Paketen
+        # Checking the necessary Linux packages
         required_tools = {
-            'xdotool': 'Mauspositionserfassung',
-            'import': 'Teil des ImageMagick-Pakets für Screenshots',
-            'convert': 'Teil des ImageMagick-Pakets für Bildverarbeitung'
+            'xdotool': 'mouse tracking',
+            'import': 'Part of the ImageMagick package for screenshots',
+            'convert': 'Part of the ImageMagick package for image processing'
         }
         
         missing_tools = []
@@ -1176,57 +1176,57 @@ def check_platform_requirements():
                 if result.returncode != 0:
                     missing_tools.append(f"{tool} ({description})")
             except Exception:
-                missing_tools.append(f"{tool} (konnte nicht überprüft werden)")
+                missing_tools.append(f"{tool} (could not be verified)")
         
         if missing_tools:
-            print("\nWARNUNG: Folgende Tools werden benötigt, wurden aber nicht gefunden:")
+            print("\nWARNING: The following tools are required but were not found:")
             for tool in missing_tools:
                 print(f"  - {tool}")
-            print("Bitte installieren Sie diese Tools für volle Funktionalität.")
-            print("Unter Ubuntu/Debian: sudo apt-get install xdotool imagemagick")
-            print("Unter Fedora: sudo dnf install xdotool ImageMagick")
+            print("Please install these tools for full functionality.")
+            print("On Ubuntu/Debian: sudo apt-get install xdotool imagemagick")
+            print("Under Fedora: sudo dnf install xdotool ImageMagick")
     
-    return True  # Immer fortfahren, auch wenn Warnungen vorliegen
+    return True  # Always continue, even if warnings are present
 
 def create_picker(debug_mode=False):
-    """Hauptfunktion zum Erstellen und Starten des Color Pickers."""
+    """Main function for creating and launching the color picker."""
     global DEBUG
     DEBUG = debug_mode
     
     if debug_mode:
-        debug_print("Starte Color Picker im Debug-Modus")
-        debug_print(f"Betriebssystem: {platform.system()} {platform.version()}")
+        debug_print("Start Color Picker in debug mode")
+        debug_print(f"operating system: {platform.system()} {platform.version()}")
     
-    # Plattformspezifische Anforderungen prüfen
+    # Check platform-specific requirements
     check_platform_requirements()
     
     try:
         root = tk.Tk()
         if debug_mode:
-            debug_print("Tkinter-Root erstellt")
+            debug_print("Tkinter root created")
         
         app = ColorPicker(root, debug=debug_mode)
         if debug_mode:
-            debug_print("Color Picker-Instanz erstellt")
+            debug_print("Color Picker instance created")
         
         root.mainloop()
     except Exception as e:
-        print(f"\nFEHLER beim Start des Color Pickers: {str(e)}")
+        print(f"\nERROR while starting the color picker: {str(e)}")
         if debug_mode:
             import traceback
             traceback.print_exc()
 
 if __name__ == "__main__":
-    # Debug-Modus kann über Kommandozeilenargument aktiviert werden
+    # Debug mode can be activated via command line argument
     import argparse
-    parser = argparse.ArgumentParser(description="Advanced Color Picker")
-    parser.add_argument('--debug', action='store_true', help='Aktiviert den Debug-Modus')
+    parser = argparse.ArgumentParser(description="Color Picker Next Gen")
+    parser.add_argument('--debug', action='store_true', help='Activates debug mode')
     args = parser.parse_args()
     
     try:
         create_picker(debug_mode=args.debug)
     except Exception as e:
-        print(f"Ein unerwarteter Fehler ist aufgetreten: {str(e)}")
+        print(f"An unexpected error has occurred: {str(e)}")
         if args.debug:
             import traceback
             traceback.print_exc()
