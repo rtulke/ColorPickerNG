@@ -691,7 +691,7 @@ class ColorPicker:
             helpmenu.add_separator()
             helpmenu.add_command(label="Test color capture", command=self.test_color_detection)
         
-        menubar.add_cascade(label="Help.", menu=helpmenu)
+        menubar.add_cascade(label="Help", menu=helpmenu)
         
         self.root.config(menu=menubar)
     
