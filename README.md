@@ -2,10 +2,6 @@
 
 A cross-platform tool for capturing and analyzing colors on the screen with support for multiple color models and color palettes that works with standard Python libraries.
 
-**Author:** Robert Tulke  
-**Email:** rt@debian.sh  
-**License:** GPLv3
-
 I developed this ColorPicker to solve a specific challenge - working on a restricted Windows system where I had limited permissions. Unable to install additional software or use pip to add Python modules, I needed to create a tool that would function using only standard libraries.
 
 Despite these constraints, the result is a versatile ColorPicker that works seamlessly across Windows, macOS, and Linux - all without requiring external dependencies that would have been cumbersome to install manually due to their complex dependency chains.
