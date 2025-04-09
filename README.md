@@ -1,4 +1,4 @@
-# Color Picker Tool
+# Color Picker Next Gen
 
 A cross-platform tool for capturing and analyzing colors on the screen with support for multiple color models and color palettes that works with standard Python libraries.
 
